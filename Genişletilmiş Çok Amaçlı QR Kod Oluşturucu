@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genişletilmiş Çok Amaçlı QR Kod Oluşturucu</title>
+    <!-- QRCodeJS Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .qr-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .add-field-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #qrcode {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .custom-fields {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-container">
+        <h1>Genişletilmiş Çok Amaçlı QR Kod Oluşturucu</h1>
+        <form id="qrForm">
+            <label for="fullname">Ad Soyad (isteğe bağlı):</label>
+            <input type="text" id="fullname" placeholder="Adınızı ve soyadınızı girin">
+
+            <label for="job">İş/Pozisyon (isteğe bağlı):</label>
+            <input type="text" id="job" placeholder="İş unvanınızı veya pozisyonunuzu girin">
+
+            <label for="address">Adres (isteğe bağlı):</label>
+            <textarea id="address" rows="2" placeholder="Adresinizi girin"></textarea>
+
+            <label for="url">Web Sitesi (isteğe bağlı):</label>
+            <input type="url" id="url" placeholder="https://">
+
+            <label for="phone">Telefon Numarası (isteğe bağlı):</label>
+            <input type="tel" id="phone" placeholder="+90 555 555 5555">
+
+            <label for="email">E-posta (isteğe bağlı):</label>
+            <input type="email" id="email" placeholder="ornek@mail.com">
+
+            <label for="iban">IBAN (isteğe bağlı):</label>
+            <input type="text" id="iban" placeholder="TR0000 0000 0000 0000 0000 00">
+
+            <label for="customText">Özel Mesaj (isteğe bağlı):</label>
+            <textarea id="customText" rows="4" placeholder="Özel bir mesaj girin"></textarea>
+
+            <div class="custom-fields">
+                <h3>Ek Alanlar</h3>
+                <div id="customFieldContainer"></div>
+                <button type="button" class="add-field-btn" onclick="addCustomField()">+ Yeni Alan Ekle</button>
+            </div>
+
+            <button type="button" onclick="generateQRCode()">QR Kod Oluştur</button>
+        </form>
+
+        <div id="qrcode"></div>
+    </div>
+
+    <script>
+        function addCustomField() {
+            var container = document.getElementById("customFieldContainer");
+
+            // Yeni bir div oluştur
+            var newField = document.createElement("div");
+
+            // Input alanı oluştur
+            var newInputLabel = document.createElement("label");
+            newInputLabel.textContent = "Ek Alan:";
+            var newInput = document.createElement("input");
+            newInput.type = "text";
+            newInput.placeholder = "Eklemek istediğiniz bilgiyi girin";
+
+            // Input'u ekle
+            newField.appendChild(newInputLabel);
+            newField.appendChild(newInput);
+
+            // Container'a ekle
+            container.appendChild(newField);
+        }
+
+        function generateQRCode() {
+            // QR kod alanını temizle
+            document.getElementById("qrcode").innerHTML = "";
+
+            // Form alanlarındaki verileri al
+            var fullname = document.getElementById("fullname").value;
+            var job = document.getElementById("job").value;
+            var address = document.getElementById("address").value;
+            var url = document.getElementById("url").value;
+            var phone = document.getElementById("phone").value;
+            var email = document.getElementById("email").value;
+            var iban = document.getElementById("iban").value;
+            var customText = document.getElementById("customText").value;
+
+            // QR kod içeriği oluştur
+            var qrContent = "";
+
+            if (fullname) qrContent += "Ad Soyad: " + fullname + "\n";
+            if (job) qrContent += "İş: " + job + "\n";
+
+            // Adresi Google Haritalar ile linkleyerek ekleyelim
+            if (address) {
+                var encodedAddress = encodeURIComponent(address);
+                var mapsLink = "https://www.google.com/maps/search/?api=1&query=" + encodedAddress;
+                qrContent += "Adres: " + mapsLink + "\n";
+            }
+
+            if (url) qrContent += "Web Sitesi: " + url + "\n";
+            if (phone) qrContent += "Telefon: " + phone + "\n";
+            if (email) qrContent += "E-posta: " + email + "\n";
+            if (iban) qrContent += "IBAN: " + iban + "\n";
+            if (customText) qrContent += "Mesaj: " + customText + "\n";
+
+            // Ek alanları oku
+            var customFieldContainer = document.getElementById("customFieldContainer");
+            var customFields = customFieldContainer.getElementsByTagName("input");
+
+            for (var i = 0; i < customFields.length; i++) {
+                if (customFields[i].value) {
+                    qrContent += "Ek Alan: " + customFields[i].value + "\n";
+                }
+            }
+
+            if (qrContent === "") {
+                alert("Lütfen en az bir alan doldurun.");
+                return;
+            }
+
+            // QR kodu oluştur
+            new QRCode(document.getElementById("qrcode"), {
+                text: qrContent,
+                width: 256,
+                height: 256,
+            });
+        }
+    </script>
+</body>
+</html>
